@@ -14,9 +14,10 @@ In essence, the solution provides continuous monitoring and incident response ca
 
 
 ## **Project Overview**
-![image](https://github.com/user-attachments/assets/e987325b-fdb5-4521-928f-fc069a4b03c0)
 
 This project automates the extraction and sharing of **Indicators of Compromise (IOCs)** from **Wazuh logs** to **MISP (Malware Information Sharing Platform)**. It enables real-time sharing of threat intelligence, helping in incident response by automatically pushing web attack data from **Wazuh** into **MISP**. The solution also cross-verifies attacker IPs with internal **Netflow traffic** in **Elasticsearch**, which can help identify additional suspicious activity.
+
+![image](https://github.com/user-attachments/assets/e987325b-fdb5-4521-928f-fc069a4b03c0)
 
 
 
