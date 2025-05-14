@@ -1,4 +1,4 @@
-# **CTI automation with Wazuh. MISP and Netflow**
+# **CTI automation with Wazuh,MISP and Netflow**
 
 ## **Project Background**
 In large enterprise networks or data centers, especially those with hundreds of applications hosted across distributed Virtual Machines (VMs), it is not uncommon for the same attacker to attempt web-based attacks across multiple VMs. Given the scale of such networks, some critical VMs might not have proper security agents installed due to resource constraints or operational challenges. Moreover, north-south traffic (traffic between the internal network and external networks) might not always be monitored by an Intrusion Detection System (IDS), or worse, it might be evading existing firewall protections.
