@@ -44,7 +44,10 @@ Before setting up the script, ensure that the following components are in place:
 
 ---
 
-1. **Create the `requirements.txt` file** by running:
-   ```bash
-   echo -e "requests\nelasticsearch\nurllib3" > requirements.txt
+### **Additional Notes**
+
+- The provided scripts have been **tested** with **Elasticsearch 7.17.13** and **Wazuh App version 4.53**.
+- For **latest versions of Wazuh**, this script **has not yet been tested**, but the **core logic** of the script remains the same. You may need to adjust certain configurations based on your Elasticsearch and Wazuh versions.
+
+---
 
