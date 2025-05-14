@@ -1,7 +1,5 @@
 # **CTI automation with Wazuh. MISP and Netflow**
 
-![image](https://github.com/user-attachments/assets/db9769b4-79e8-4d4a-9399-0cbc0fe5de00)
-
 ## **Project Background**
 In large enterprise networks or data centers, especially those with hundreds of applications hosted across distributed Virtual Machines (VMs), it is not uncommon for the same attacker to attempt web-based attacks across multiple VMs. Given the scale of such networks, some critical VMs might not have proper security agents installed due to resource constraints or operational challenges. Moreover, north-south traffic (traffic between the internal network and external networks) might not always be monitored by an Intrusion Detection System (IDS), or worse, it might be evading existing firewall protections.
 
@@ -10,6 +8,10 @@ In such environments, detecting and responding to web-based attacks becomes a ma
 To address these issues, the proposed solution automates the process of extracting Indicators of Compromise (IOCs) from Wazuh logs, a powerful security monitoring tool, and pushing them to MISP (Malware Information Sharing Platform). The solution not only extracts the web attack data from Wazuh but also enhances the detection process by cross-verifying attacker IPs with Netflow traffic data stored in Elasticsearch. This helps identify malicious activity that might have been missed by traditional security measures and ensures a proactive approach to threat intelligence sharing.
 
 In essence, the solution provides continuous monitoring and incident response capabilities for detecting web attacks, even in the absence of direct agent installation or when facing challenges such as network misconfigurations and firewall evasion. It creates an automated flow of threat data from Wazuh logs to MISP, ensuring that critical attack data is shared in real-time, enhancing overall security posture and facilitating quicker responses to emerging threats.
+
+![image](https://github.com/user-attachments/assets/db9769b4-79e8-4d4a-9399-0cbc0fe5de00)
+
+
 
 ## **Project Overview**
 ![image](https://github.com/user-attachments/assets/e987325b-fdb5-4521-928f-fc069a4b03c0)
