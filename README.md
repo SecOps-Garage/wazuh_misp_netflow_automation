@@ -68,11 +68,6 @@ Ensure the following are in place before setup:
 - **Wazuh Manager:** Collects/analyzes security events; alerts are stored as indices in Elasticsearch.
 - **MISP Instance:** Receives IOCs from Wazuh alerts for real-time threat intelligence sharing.
 - **Netflow Log Collection in Elasticsearch:** Stores Netflow logs to cross-verify attacker IPs.
-
----
-
-Absolutely! Here is the section you should **copy and paste** into your `README.md` file directly after the **Required Components** section:
-
 ---
 
 ## Automated IOC Extraction and MISP Integration
@@ -144,6 +139,40 @@ flowchart TD
 
 This script is the core bridge between detection in Wazuh and actionable sharing in MISP, enabling real-time, automated threat intelligence across your network.
 
+
+---
+
+## Proof-of-Concept (POC) Steps
+
+This section demonstrates the end-to-end workflow of IOC extraction and sharing, with key screenshots from each stage:
+
+### 1. Detection in Wazuh Dashboard
+
+*Wazuh dashboard displaying detections from web access logs (e.g., suspicious requests, attacker IPs, MITRE mapping).*
+![image](https://github.com/user-attachments/assets/1b13ed64-36b1-42ba-9cb9-696d994d2213)
+
+---
+
+### 2. Execution of the Script
+
+*Running the `wazuh_to_misp_ingest.py` script and its output in the terminal, showing successful IOC extraction and event pushes to MISP.*
+
+![image](https://github.com/user-attachments/assets/cb1d878a-54a3-400a-b550-94bc40bad2bd)
+
+---
+
+### 3. Event Creation in MISP Portal
+
+*Viewing the newly created event in the MISP portal, with IOCs, attributes, tags, and associated threat context.*
+
+![image](https://github.com/user-attachments/assets/91eab30e-da6a-47be-b7d2-3307dc344d4e)
+
+
+---
+
+![image](https://github.com/user-attachments/assets/1aace8a4-93ac-4c55-9589-90ebee934810)
+
+---
 
 
 ## Additional Notes
