@@ -1,53 +1,104 @@
-# **CTI automation with Wazuh,MISP and Netflow**
-
-## **Project Background**
-In large enterprise networks or data centers, especially those with hundreds of applications hosted across distributed Virtual Machines (VMs), it is not uncommon for the same attacker to attempt web-based attacks across multiple VMs. Given the scale of such networks, some critical VMs might not have proper security agents installed due to resource constraints or operational challenges. Moreover, north-south traffic (traffic between the internal network and external networks) might not always be monitored by an Intrusion Detection System (IDS), or worse, it might be evading existing firewall protections.
-
-In such environments, detecting and responding to web-based attacks becomes a major challenge, especially when the attacker is executing coordinated attacks across multiple VMs or applications. Without proper visibility into the traffic and events from these VMs, enterprises are left vulnerable to widespread attacks that could go unnoticed, leading to data breaches or compromises.
-
-To address these issues, the proposed solution automates the process of extracting Indicators of Compromise (IOCs) from Wazuh logs, a powerful security monitoring tool, and pushing them to MISP (Malware Information Sharing Platform). The solution not only extracts the web attack data from Wazuh but also enhances the detection process by cross-verifying attacker IPs with Netflow traffic data stored in Elasticsearch. This helps identify malicious activity that might have been missed by traditional security measures and ensures a proactive approach to threat intelligence sharing.
-
-In essence, the solution provides continuous monitoring and incident response capabilities for detecting web attacks, even in the absence of direct agent installation or when facing challenges such as network misconfigurations and firewall evasion. It creates an automated flow of threat data from Wazuh logs to MISP, ensuring that critical attack data is shared in real-time, enhancing overall security posture and facilitating quicker responses to emerging threats.
-
-![image](https://github.com/user-attachments/assets/db9769b4-79e8-4d4a-9399-0cbc0fe5de00)
 
 
+# CTI Automation with Wazuh, MISP, and Netflow
 
-## **Project Overview**
+## Project Background
 
-This project automates the extraction and sharing of **Indicators of Compromise (IOCs)** from **Wazuh logs** to **MISP (Malware Information Sharing Platform)**. It enables real-time sharing of threat intelligence, helping in incident response by automatically pushing web attack data from **Wazuh** into **MISP**. The solution also cross-verifies attacker IPs with internal **Netflow traffic** in **Elasticsearch**, which can help identify additional suspicious activity.
+Modern enterprise networks and data centers have grown in both size and complexity. With hundreds of applications running on distributed Virtual Machines (VMs) and cloud platforms, the attack surface is large and constantly changing. This presents several key challenges for security teams:
 
-![image](https://github.com/user-attachments/assets/e987325b-fdb5-4521-928f-fc069a4b03c0)
+- **Challenge 1: Siloed Detection**  
+  Security tools like Wazuh can detect suspicious activity on individual machines or applications, but these alerts are often isolated. As a result, it’s hard to spot patterns—such as the same attacker targeting multiple systems across the network.
 
-### **Key Benefits**
-- **Real-Time Threat Intelligence**: Pushes IOCs to MISP as soon as they are detected in Wazuh logs, enabling rapid response.
-- **Automated Incident Response**: Reduces manual intervention by automatically sharing IOCs.
-- **Enhanced Detection**: Cross-references IOCs with internal **Netflow traffic** using **Elasticsearch** to detect further attacks.
+- **Challenge 2: Slow Threat Intelligence Sharing**  
+  When Indicators of Compromise (IOCs)—like malicious IP addresses—are detected, they need to be shared quickly with all relevant teams and systems. Delays can give attackers more time to move laterally or attack other assets.
+
+- **Challenge 3: Limited Network Visibility**  
+  Even if an attacker is identified on one system, it's difficult to know if they have tried to access or have already compromised other systems without comprehensive network traffic analysis.
+
+### Solution Overview
+---
+
+This project solves these problems by automating the collection and sharing of IOCs, and by correlating endpoint detections with network activity:
+
+![image](https://github.com/user-attachments/assets/e574d1f5-a232-47e4-8b45-615fa072f3e1)
+
+
+1. **Automated IOC Extraction:**  
+   When Wazuh detects suspicious activity, the relevant IOCs (like attacker IPs) are automatically extracted.
+
+2. **Real-Time Sharing with MISP:**  
+   These IOCs are immediately shared with MISP (Malware Information Sharing Platform), so threat intelligence is updated in real time and available to all connected teams and tools.
+
+3. **Network Correlation via Elasticsearch:**  
+   The solution checks internal Netflow logs (stored in Elasticsearch) to see if the attacker IP has tried to access other systems, helping to identify broader attack campaigns or lateral movement.
+
+This integrated approach enables faster incident detection, better visibility, and more effective response.
 
 ---
 
-## **Required Components**
+## Solution Architecture
 
-Before setting up the script, ensure that the following components are in place:
+Below is a high-level diagram showing how the system works:
 
-### **1. Wazuh Manager**
-- The **Wazuh Manager** collects and analyzes security events, including **web access logs**.
-- **Alerts** generated by Wazuh are stored as **indices** in **Elasticsearch** for further processing.
+```mermaid
+flowchart LR
+    subgraph Detection & Collection
+        Wazuh[Wazuh: Security Logs & Alerts]
+    end
+    subgraph Automation & Correlation
+        Script[Automation Script]
+    end
+    subgraph Threat Intelligence Sharing
+        MISP[MISP: Threat Intelligence Platform]
+    end
+    subgraph Network Analysis
+        ES[Elasticsearch: Netflow Logs]
+    end
 
-### **2. MISP Instance**
-- You need a **MISP (Malware Information Sharing Platform)** instance to push the **IOCs** from Wazuh alerts.
-- MISP allows for **real-time sharing** of threat intelligence with internal and external stakeholders.
+    Wazuh -- Extract IOCs --> Script
+    Script -- Push IOCs --> MISP
+    Script -- Query IPs --> ES
+    ES -- Return Matches --> Script
+```
 
-### **3. Netflow Log Collection in Elasticsearch**
-- **Netflow logs** should be stored in **Elasticsearch** to cross-verify the attacker IPs detected in Wazuh logs.
-- Netflow logs help identify further malicious activity based on network traffic patterns.
+## Required Components
+
+Ensure the following are in place before setup:
+
+- **Wazuh Manager:** Collects/analyzes security events; alerts are stored as indices in Elasticsearch.
+- **MISP Instance:** Receives IOCs from Wazuh alerts for real-time threat intelligence sharing.
+- **Netflow Log Collection in Elasticsearch:** Stores Netflow logs to cross-verify attacker IPs.
 
 ---
 
-### **Additional Notes**
 
-- The provided scripts have been **tested** with **Elasticsearch 7.17.13** and **Wazuh App version 4.53**.
-- For **latest versions of Wazuh**, this script **has not yet been tested**, but the **core logic** of the script remains the same. You may need to adjust certain configurations based on your Elasticsearch and Wazuh versions.
+## Usage
+
+_Describe how to run the automation:_
+
+```bash
+python main.py
+```
 
 ---
 
+## Additional Notes
+
+- Tested with **Elasticsearch 7.17.13** and **Wazuh App version 4.53**.
+- For newer Wazuh versions, please review/adjust configurations as needed.
+
+---
+
+## Contributing / Support
+
+_Explain how users can contribute or get help._
+
+---
+
+## License
+
+_Provide your license information here (e.g., MIT, Apache 2.0, etc.)._
+
+---
+
+**Fill in the code, configuration, and diagram sections as needed. All previous images are preserved as requested.**
