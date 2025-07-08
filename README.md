@@ -71,16 +71,80 @@ Ensure the following are in place before setup:
 
 ---
 
-
-## Usage
-
-_Describe how to run the automation:_
-
-```bash
-python main.py
-```
+Absolutely! Here is the section you should **copy and paste** into your `README.md` file directly after the **Required Components** section:
 
 ---
+
+## Automated IOC Extraction and MISP Integration
+
+The core of this project is the [`wazuh_to_misp_ingest.py`](wazuh_to_misp_ingest.py) script, which automates the extraction of Indicators of Compromise (IOCs) from Wazuh alerts stored in Elasticsearch and shares them as structured events with your MISP instance.
+
+### How the Script Works
+
+- **Configurable Connections:**  
+  The script connects securely to your Elasticsearch (where Wazuh alerts are stored) and your MISP instance using API keys and credentials.
+
+- **Smart Tracking:**  
+  It keeps track of which events have already been pushed using local files, ensuring only new and unique IOCs are sent to MISP.
+
+- **Alert Query & Grouping:**  
+  - Fetches recent alerts from Wazuh indices in Elasticsearch, focusing on web-access logs with attacker IPs, URLs, and MITRE ATT&CK context.
+  - Groups alerts by source IP, collecting all URLs, MITRE tactics/techniques, and geolocation info for each attacker.
+
+- **Event Creation in MISP:**  
+  - For every new attacker IP (not previously pushed), it creates a MISP event with:
+    - Source IP as `ip-src`
+    - All suspicious/malicious URLs as `url` attributes
+    - MITRE tactic & technique, geo data, and relevant tags
+  - Publishes the event to MISP via its API
+
+- **Runs Automatically:**  
+  By default, the script runs in a loop, updating MISP every 15 minutes with any new threats detected.
+
+### Example Configuration
+
+Edit the script variables  [`wazuh_to_misp_ingest.py`](wazuh_to_misp_ingest.py) or set environment variables as follows:
+
+```env
+MISP_URL=https://your-misp-server-url
+MISP_KEY=YOUR_MISP_API_KEY
+ES_HOST=https://your-elasticsearch-host:9200
+ES_USER=your-es-username
+ES_PASS=your-es-password
+```
+
+### Usage
+
+To start the automation, simply run:
+
+```bash
+python3 wazuh_to_misp_ingest.py
+```
+
+The script will continue running, periodically checking for new alerts and pushing them to MISP.
+
+### Workflow Diagram
+```mermaid
+flowchart TD
+    Wazuh["Wazuh Alerts (Elasticsearch)"]
+    Script["wazuh_to_misp_ingest.py"]
+    MISP["MISP Server"]
+
+    Wazuh -->|Fetch alerts| Script
+    Script -->|Group, enrich, deduplicate| Script
+    Script -->|Push as event| MISP
+    Script -->|Track UUID and timestamps| Script
+    Script -->|Repeat every 15 min| Script
+```
+### Security Note
+
+- In production, enable SSL certificate verification and restrict access to the script.
+
+---
+
+This script is the core bridge between detection in Wazuh and actionable sharing in MISP, enabling real-time, automated threat intelligence across your network.
+
+
 
 ## Additional Notes
 
