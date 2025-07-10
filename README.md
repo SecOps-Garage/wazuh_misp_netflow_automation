@@ -175,6 +175,181 @@ This section demonstrates the end-to-end workflow of IOC extraction and sharing,
 ---
 
 
+## Sharing MISP Events with the Community
+
+After creating events in MISP, you can leverage its sharing features to distribute threat intelligence with your security community, partners, or other organizations.
+
+### Step-by-Step: Sharing MISP Events
+
+1. **Review and Tag Your Event**
+   - Open your event in MISP.
+   - Add relevant tags (e.g., TLP, sector, threat type) to classify the event for consumers.
+   - _Example Screenshot:_
+    ![image](https://github.com/user-attachments/assets/fa09d981-0769-46ae-8d9e-8fdebf6cd0ff)
+
+   - publish the event
+
+     ![image](https://github.com/user-attachments/assets/1f243ff8-288c-4ca5-a4ef-6a3a8848dd7e)
+
+
+
+  
+
+2. **Set Distribution Level**
+   - In the event editor, set the **Distribution** field:
+     - Your Organization Only
+     - This Community Only
+     - Connected Communities
+     - All Communities
+   - Selecting a broader level increases event reach.
+   - _Example Screenshot:_  
+     ![Distribution Settings](path/to/misp_distribution.png)
+
+3. **Sync with Partner MISP Instances**
+   - Go to **Administration > List Servers** and add a new server for peer sharing.
+   - Configure sync direction (Push/Pull/Both).
+   - Ensure your event’s distribution and tags allow it to be shared with the desired partner.
+   - _Example Screenshot:_  
+     ![MISP Sync Setup](path/to/misp_sync.png)
+
+4. **Manual Export (Optional)**
+   - Events can be exported via the **Export** tab in STIX, JSON, CSV, or other formats.
+   - Share exports by email, API, or other means.
+   - _Example Screenshot:_  
+     ![MISP Export](path/to/misp_export.png)
+
+5. **Verify Sharing**
+   - Check partner MISP instance or recipient to confirm successful sharing.
+   - _Example Screenshot:_  
+     ![MISP Event in Peer Instance](path/to/peer_misp_event.png)
+
+---
+
+## Leveraging MISP IOCs with Netflow via Elasticsearch
+
+Integrate MISP IOCs into your network monitoring pipeline to detect malicious activity using Netflow logs and Elasticsearch.
+ 
+
+
+> **Note:**  
+> For this demonstration, our SIEM is already configured to collect Netflow logs from one of the perimeter devices.
+
+### Step 1: Ingest MISP IOCs into Elasticsearch Using Filebeat Threat Intel Module
+
+---
+
+1. **Enable the Filebeat Threat Intel Module**
+   
+   Enable the module using the following command:
+   ```bash
+   sudo filebeat modules enable threatintel
+   ```
+
+---
+
+Then, edit the threatintel.yml file in the /etc/filebeat/modules.d/ directory with your own misp instance ip/url and API
+
+#### Example: `threatintel.yml` for Filebeat MISP Integration
+
+```yaml
+misp:
+  enabled: true
+
+  # Input used for ingesting threat intel data, defaults to JSON.
+  var.input: httpjson
+
+  # The URL of the MISP instance, should end with "/events/restSearch".
+  var.url: https://your-misp-server-url/events/restSearch
+
+  # The authentication token used to contact the MISP API. Found in your MISP user account settings.
+  var.api_token: YOUR_MISP_API_TOKEN
+
+  # Configures the type of SSL verification done. Use 'none' for self-signed certs (not recommended for production).
+  var.ssl.verification_mode: none
+
+  # Optional filters for the API to filter out results. See Filebeat module docs for details.
+  #var.filters:
+  #  - threat_level: [4, 5]
+  #  - to_ids: true
+
+  # How far back to look on first startup, in hours.
+  var.first_interval: 300h
+
+  # The interval to poll the API for updates.
+```
+
+> **Note:**  
+> - Replace `https://your-misp-server-url` and `YOUR_MISP_API_TOKEN` with your actual details during deployment, but do **not** commit these to public repos.
+> - For production, set `ssl.verification_mode` to `full` and use valid certificates.
+
+
+
+2. **Configure Output to Elasticsearch**
+   - Ensure Filebeat outputs to your Elasticsearch cluster:
+     ```yaml
+     output.elasticsearch:
+       hosts: ["https://your-es-host:9200"]
+       username: "your-es-username"
+       password: "your-es-password"
+       ssl.verification_mode: none   # Use 'full' in production
+     ```
+
+3. **Start Filebeat**
+   - On your server, run:
+     ```bash
+     sudo filebeat modules enable threatintel
+     sudo filebeat setup
+     sudo systemctl start filebeat
+     sudo filebeat setup -e
+     ```
+   - Confirm that Filebeat is running and logs are being sent to Elasticsearch.
+   - _Example Screenshot:_  
+     ![image](https://github.com/user-attachments/assets/79b4a6da-16e0-4c49-8be0-a62962a69ea6)
+
+
+4. **Verify IOCs in Elasticsearch**
+   - In Kibana, search the `filebeat-*` index for recent MISP indicators.
+   - _Example Screenshot:_  
+     ![image](https://github.com/user-attachments/assets/784c3325-9068-4ef7-9b96-78235a64930c)
+
+
+---
+
+### Step 2: Create Indicator Match Security Rules in Elasticsearch (Kibana)
+
+1. **Go to Security > Rules in Kibana**
+   - Navigate to **Security > Detection rules** in Kibana.
+   - Click **Create rule** > **Indicator match rule**.
+
+2. **Configure the Rule**
+   - **Name:** e.g., "Netflow matches with MISP IOCs"
+   - **Index patterns:** (e.g., `netflow-*`)
+   - **Indicator index patterns:** (e.g., `filebeat-*`)
+   - **Indicator mapping:**
+     - Match `source.ip` or `destination.ip` in Netflow data to `threat.indicator.ip` from threat intel.
+   - _Example Screenshot:_  
+     ![Indicator Match Rule Setup](path/to/indicator_match_rule.png)
+
+3. **Set Rule Actions**
+   - Choose actions: send alerts, email, Slack, etc.
+   - Optionally, add severity and tags.
+
+4. **Save and Enable the Rule**
+   - Save and enable your rule.
+   - _Example Screenshot:_  
+     ![Enabled Rule](path/to/enabled_rule.png)
+
+5. **Test the Setup**
+   - Simulate or use real traffic to trigger a match.
+   - Review alerts in Kibana.
+   - _Example Screenshot:_  
+     ![Triggered Alert](path/to/alert_result.png)
+
+---
+
+**Replace the screenshot paths with your own images to illustrate each step.**  
+If you need example configuration files or troubleshooting notes for these steps, let me know!
+
 ## Additional Notes
 
 - Tested with **Elasticsearch 7.17.13** and **Wazuh App version 4.53**.
