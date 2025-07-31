@@ -1,6 +1,6 @@
 
 
-# CTI Automation with Wazuh, MISP, and Netflow
+# CTI Automation with Wazuh, MISP, and Netflow (This is a work in progress)
 
 ## Project Background
 
